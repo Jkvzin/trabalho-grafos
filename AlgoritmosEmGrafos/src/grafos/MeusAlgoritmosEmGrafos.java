@@ -2,6 +2,7 @@ package grafos;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 
 public class MeusAlgoritmosEmGrafos implements AlgoritmosEmGrafos {
 
@@ -197,6 +198,7 @@ public class MeusAlgoritmosEmGrafos implements AlgoritmosEmGrafos {
     private Cor[] corBFS;
     private Collection<Aresta> arestasArvoreBFS;
 
+    @Override
     public Collection<Aresta> buscaEmLargura (Grafo g, Vertice s){
         try{
             int V = g.numeroDeVertices();
@@ -240,13 +242,16 @@ public class MeusAlgoritmosEmGrafos implements AlgoritmosEmGrafos {
         return arestasArvoreBFS;
     }
     
-    /**
-     * Verifica se existe ciclo no grafo.
-     * @param g Grafo.
-     * @return True, se existe ciclo, False, em caso contrário.
-     */
-    public boolean existeCiclo(Grafo g);
+    @Override
+    public boolean existeCiclo(Grafo g){
+        if (arestasRetorno == null){
+            buscaEmProfundidade(g);
+        }
+        return !arestasRetorno.isEmpty();
+    }
     
+
+
      /**
      * Identifica os componentes fortemente conexos de um grafo e retorna o grafo reduzido
      * @param g Grafo original
@@ -254,13 +259,75 @@ public class MeusAlgoritmosEmGrafos implements AlgoritmosEmGrafos {
      */
     public Grafo componentesFortementeConexos (Grafo g);
     
-    /**
-     * Retorna a árvore geradora mínima.
-     * @param g O grafo.
-     * @return Retorna a árvore geradora mínima.
-     */
-    public Collection<Aresta> arvoreGeradoraMinima(Grafo g);
+
+
     
+    private Collection<Aresta> X;
+    private Vertice[] paiAGM;
+    private ArrayList<ArrayList<Vertice>> conjuntos;
+
+    @Override
+    public Collection<Aresta> arvoreGeradoraMinima(Grafo g){
+        X = new ArrayList<>();
+        int V = g.numeroDeVertices();
+        ArrayList<Vertice> vertices = g.vertices();
+        conjuntos = new ArrayList<>(V);
+        ArrayList<Aresta> A_linha = obterTodasArestas(g);
+        
+        for (int i = 0; i < V; i++) {
+            conjuntos.add(new ArrayList<Vertice>());
+            conjuntos.get(i).add(vertices.get(i));
+        }
+
+        A_linha.sort(Comparator.comparingDouble(Aresta::peso));
+        
+        for(Aresta aresta : A_linha){
+            Vertice u = aresta.origem();
+            Vertice v = aresta.destino();
+
+            int i;
+            for (i = 0; i < conjuntos.size(); i++) {
+                if (conjuntos.get(i).contains(v)) {
+                    break;
+                }
+            }
+
+            int j;
+            for (j = 0; j < conjuntos.size(); j++) {
+                if (conjuntos.get(j).contains(u)) {
+                    break;
+                }
+            }
+
+            if (i != j) {
+                X.add(aresta);
+                conjuntos.get(j).addAll(conjuntos.get(i));
+                conjuntos.get(i).clear();
+            }
+        }
+
+        return X;
+        
+    }
+
+    private ArrayList<Aresta> obterTodasArestas(Grafo g) {
+        ArrayList<Aresta> todasArestas = new ArrayList<>();
+        try {
+            for (Vertice u : g.vertices()) {
+                // Itera em cada vizinho V...
+                for (Vertice v : g.adjacentesDe(u)) {
+                    // AQUI ESTÁ A MÁGICA:
+                    // Ele chama .addAll() para pegar TODAS as arestas entre (u, v)
+                    todasArestas.addAll(g.arestasEntre(u, v));
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return todasArestas;
+    }
+
+
+    
+
     /**
      * Calcula o custo de uma árvore geradora.
      * @param arestas As arestas que compoem a árvore geradora.
