@@ -190,12 +190,55 @@ public class MeusAlgoritmosEmGrafos implements AlgoritmosEmGrafos {
         return arestasCruzamento;
     }
     
-    /**
-     * Realiza busca em largura no grafo 
-     * @param g Grafo
-     * @return as arestas da árvore resultante
-     */
-    public Collection<Aresta> buscaEmLargura (Grafo g);
+
+
+    private int[] dBFS; // Distância (é o "tempo de descoberta" no BFS)
+    private Vertice[] paiBFS;
+    private Cor[] corBFS;
+    private Collection<Aresta> arestasArvoreBFS;
+
+    public Collection<Aresta> buscaEmLargura (Grafo g, Vertice s){
+        try{
+            int V = g.numeroDeVertices();
+
+            corBFS = new Cor[V];
+            dBFS = new int[V];
+            paiBFS = new Vertice[V];
+
+            arestasArvoreBFS = new ArrayList<>();
+            
+            ArrayList<Vertice> vertices = g.vertices();
+
+            for(Vertice u : vertices){
+                corBFS[u.id()] = Cor.BRANCO;
+                paiBFS[u.id()] = null;
+                dBFS[u.id()] = Integer.MAX_VALUE;
+            }
+            corBFS[s.id()] = Cor.CINZA;
+            dBFS[s.id()] = 0;
+
+            ArrayList<Vertice> Q = new ArrayList<>();
+
+            Q.add(s);
+
+            while (!Q.isEmpty()) {
+                Vertice u = Q.remove(0);
+                for(Vertice v : g.adjacentesDe(u)){
+                    if (corBFS[v.id()] == Cor.BRANCO) {
+                        corBFS[v.id()] = Cor.CINZA;
+                        dBFS[v.id()] = dBFS[u.id()] + 1;
+                        paiBFS[v.id()] = u;
+                        Q.add(v);
+                        arestasArvoreBFS.add(g.arestasEntre(u, v).get(0));
+                    }
+                }
+                corBFS[u.id()] = Cor.PRETO;
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return arestasArvoreBFS;
+    }
     
     /**
      * Verifica se existe ciclo no grafo.
