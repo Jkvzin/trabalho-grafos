@@ -43,13 +43,17 @@ public class GrafoMatrizAdjacencia implements Grafo {
         return this.matriz[origem.id()][destino.id()] != null;
     }
 
+
+    //Verificar depois se dá certo
     @Override
     public int grauDoVertice(Vertice vertice) throws Exception {
-        // Retorna o Grau de SAÍDA (contagem de arestas saindo)
         int grau = 0;
         int u = vertice.id();
         for (int v = 0; v < numVertices; v++) {
             if (this.matriz[u][v] != null) {
+                grau++;
+            }
+            if (this.matriz[v][u] != null) {
                 grau++;
             }
         }

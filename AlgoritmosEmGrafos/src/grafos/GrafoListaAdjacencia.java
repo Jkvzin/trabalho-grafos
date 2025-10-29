@@ -48,6 +48,8 @@ public class GrafoListaAdjacencia implements Grafo{
         return false;
     }
     
+
+    //VERIFICAR TAMBÉM AS ARESTAS QUE ENTRAM NELE
     @Override
     public int grauDoVertice(Vertice vertice) throws Exception{
         return this.listaAdjacencia.get(vertice.id()).size();
