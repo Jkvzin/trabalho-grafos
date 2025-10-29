@@ -261,9 +261,8 @@ public class MeusAlgoritmosEmGrafos implements AlgoritmosEmGrafos {
     
 
 
-    
+
     private Collection<Aresta> X;
-    private Vertice[] paiAGM;
     private ArrayList<ArrayList<Vertice>> conjuntos;
 
     @Override
@@ -314,9 +313,7 @@ public class MeusAlgoritmosEmGrafos implements AlgoritmosEmGrafos {
         ArrayList<Aresta> todasArestas = new ArrayList<>();
         try {
             for (Vertice u : g.vertices()) {
-                // Itera em cada vizinho V...
                 for (Vertice v : g.adjacentesDe(u)) {
-                    // AQUI ESTÁ A MÁGICA:
                     // Ele chama .addAll() para pegar TODAS as arestas entre (u, v)
                     todasArestas.addAll(g.arestasEntre(u, v));
                 }
