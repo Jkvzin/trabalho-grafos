@@ -51,8 +51,21 @@ public class GrafoListaAdjacencia implements Grafo{
 
     //VERIFICAR TAMBÉM AS ARESTAS QUE ENTRAM NELE
     @Override
-    public int grauDoVertice(Vertice vertice) throws Exception{
-        return this.listaAdjacencia.get(vertice.id()).size();
+    public int grauDoVertice(Vertice vertice) throws Exception {
+        // 1. Grau de Saída (rápido)
+        int grauSaida = this.listaAdjacencia.get(vertice.id()).size();
+        
+        // 2. Grau de Entrada (lento, O(V+E))
+        int grauEntrada = 0;
+        for (ArrayList<Aresta> listaDeOutroVertice : this.listaAdjacencia) {
+            for (Aresta aresta : listaDeOutroVertice) {
+                if (aresta.destino() == vertice) {
+                    grauEntrada++;
+                }
+            }
+        }
+        
+        return grauSaida + grauEntrada;
     }
     
     @Override
@@ -70,6 +83,14 @@ public class GrafoListaAdjacencia implements Grafo{
      * Se existirem arestas paralelas ele vai adicionar duas vezes / não atrapalha mas é redundante
      */
     public ArrayList<Vertice> adjacentesDe(Vertice vertice) throws Exception{
+        try {
+            if (vertice == null) {
+                throw new Exception("Vertice não encontrado, verifique se escolheu um vértice que realmente existe no grafo.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
         ArrayList<Vertice> adjacentes = new ArrayList<>();
         ArrayList<Aresta> arestasVertice = listaAdjacencia.get(vertice.id());
         for(Aresta aresta : arestasVertice){

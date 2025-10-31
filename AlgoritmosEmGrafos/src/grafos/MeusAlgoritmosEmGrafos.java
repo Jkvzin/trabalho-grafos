@@ -2,6 +2,7 @@ package grafos;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 
 public class MeusAlgoritmosEmGrafos implements AlgoritmosEmGrafos {
@@ -314,7 +315,6 @@ public class MeusAlgoritmosEmGrafos implements AlgoritmosEmGrafos {
         try {
             for (Vertice u : g.vertices()) {
                 for (Vertice v : g.adjacentesDe(u)) {
-                    // Ele chama .addAll() para pegar TODAS as arestas entre (u, v)
                     todasArestas.addAll(g.arestasEntre(u, v));
                 }
             }
@@ -323,45 +323,166 @@ public class MeusAlgoritmosEmGrafos implements AlgoritmosEmGrafos {
     }
 
 
+    public double custoDaArvoreGeradora(Grafo g, Collection<Aresta> arestas) throws Exception{
+        int V = g.numeroDeVertices();
+        double custo = 0;
+
+        // Uma árvore geradora deve ter V-1 arestas.
+        if (V > 0 && arestas.size() != V - 1) {
+            throw new Exception("Não é uma árvore geradora: número incorreto de arestas. Esperado: " + (V - 1) + ", Recebido: " + arestas.size());
+        } else if (V == 0 && arestas.size() > 0) {
+            throw new Exception("Não é uma árvore geradora: grafo vazio mas arestas fornecidas.");
+        }
+        if (V == 0) return 0;
+
+        for(Aresta aresta : arestas){
+            custo += aresta.peso();
+        }
+
+        return custo;
+    }
     
 
-    /**
-     * Calcula o custo de uma árvore geradora.
-     * @param arestas As arestas que compoem a árvore geradora.
-     * @param g O grafo.
-     * @return O custo da árvore geradora.
-     * @throws java.lang.Exception Se a árvore apresentada não é geradora do grafo.
-     */
-    public double custoDaArvoreGeradora(Grafo g, Collection<Aresta> arestas) throws Exception;
+
+
+    private Vertice[] paiC;
+    private double[] dC;
+    private ArrayList<Vertice> Q;
+    private ArrayList<Vertice> S;
+    private ArrayList<Aresta> arestasCaminhoMinimo;
+
+    private void inicializa(Grafo g, Vertice s){
+        int V = g.numeroDeVertices();
+        paiC = new Vertice[V];
+        dC = new double[V];
+        Q = new ArrayList<>();
+        S = new ArrayList<>();
+        arestasCaminhoMinimo = new ArrayList<>();
+        
+        ArrayList<Vertice> vertices = g.vertices();
+
+        for(Vertice u : vertices){
+            paiC[u.id()] = null;
+            dC[u.id()] = Integer.MAX_VALUE;
+        }
+        dC[s.id()] = 0;
+    }
+
+    private void relaxa(Vertice u, Vertice v, double w){
+        if (dC[v.id()] > (dC[u.id()] + w)) {
+            dC[v.id()] = dC[u.id()] + w;
+            paiC[v.id()] = u;
+        }
+    }
+
+    public ArrayList<Aresta> arestasCaminhoMinimoMinimo(Grafo g, Vertice origem, Vertice destino ){
+        inicializa(g, origem);
+        Q = g.vertices();
+        while (!Q.isEmpty()) {
+            Vertice u = null;
+            double minDist = Double.POSITIVE_INFINITY;
+
+            for(Vertice v : Q){
+                if (dC[v.id()] < minDist) {
+                    minDist = dC[v.id()];
+                    u = v;
+                }
+            }
+
+            if (u == null) {
+                break;
+            }
+            Q.remove(u);
+            S.add(u);
+            if (u.id() == destino.id()) {
+                break;
+            }
+
+            
+            try {
+                for (Vertice v : g.adjacentesDe(u)) {
+
+                    ArrayList<Aresta> arestasParalelas = g.arestasEntre(u, v);
+                    
+                    if (arestasParalelas.isEmpty()) {
+                        continue; 
+                    }
+
+                    double w = Double.POSITIVE_INFINITY;
+                    for (Aresta a : arestasParalelas) {
+                        if (a.peso() < w) {
+                            w = a.peso();
+                        }
+                    }
+
+                    relaxa(u, v, w);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        Vertice atual = destino;
+        try {
+            while (paiC[atual.id()] != null) { 
+                Vertice p = paiC[atual.id()];
+                
+                double pesoUsado = dC[atual.id()] - dC[p.id()];
+                Aresta arestaDoCaminho = null;
+
+                for(Aresta a : g.arestasEntre(p, atual)) {
+                    if (Math.abs(a.peso() - pesoUsado) < 0.0001) {
+                        arestaDoCaminho = a;
+                        break;
+                    }
+                }
+
+                if (arestaDoCaminho == null && !g.arestasEntre(p, atual).isEmpty()) {
+                    arestaDoCaminho = g.arestasEntre(p, atual).get(0);
+                }
+                
+                arestasCaminhoMinimo.add(arestaDoCaminho);
+                atual = p;
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+
+        Collections.reverse(arestasCaminhoMinimo);
+        
+        // Validação final
+        if (arestasCaminhoMinimo.isEmpty() && !origem.equals(destino)) return new ArrayList<>();
+        if (!arestasCaminhoMinimo.isEmpty() && !arestasCaminhoMinimo.get(0).origem().equals(origem)) return new ArrayList<>();
+
+        return arestasCaminhoMinimo;
+    }
     
-    /**
-     * Retorna (em ordem) as arestas que compoem o caminho mais curto 
-     * entre um par de vértices. Esta função considera o peso das arestas
-     * para composição do caminho mais curto.
-     * @param g O grafo
-     * @param origem Vértice de origem
-     * @param destino Vértice de destino
-     * @return As arestas (em ordem) do caminho mais curto.
-     */
-    public ArrayList<Aresta> caminhoMinimo(Grafo g, Vertice origem, Vertice destino );
-    
-    /**
-     * Dado um caminho, esta função calcula o custo do caminho.
-     * @param arestas Arestas que compõem o caminho
-     * @param g Grafo
-     * @param origem Vértice de origem
-     * @param destino Vértice de destino
-     * @return o custo da caminho.
-     * @throws java.lang.Exception Se a sequencia apresentada não é um caminho
-     * entre origem e destino.
-     */
-    public double custoDoCaminhoMinimo (Grafo g, ArrayList<Aresta> arestas, Vertice origem, Vertice destino ) throws Exception;
+    public double custoDoCaminhoMinimo (Grafo g, ArrayList<Aresta> arestas, Vertice origem, Vertice destino ) throws Exception{
+        double custoTotal = 0;
+        Vertice verticeAtual = origem;
+
+        for (Aresta a : arestas) {
+            
+            if (a.origem().id() != verticeAtual.id()) {
+                throw new Exception("A sequência de arestas não forma um caminho válido: aresta " + a.origem().id() + "->" + a.destino().id() + " esperava começar de " + verticeAtual.id());
+            }
+            
+            custoTotal += a.peso();
+            verticeAtual = a.destino();
+        }
+        
+        if (verticeAtual.id() != destino.id()) {
+            throw new Exception("O caminho não termina no vértice de destino esperado. Terminou em: " + verticeAtual.id() + ", Esperado: " + destino.id());
+        }
+
+        return custoTotal;
+    }
     
     /**
      * Calcula o fluxo máximo em um grafo ponderado orientado
      * @param g Grafo
      * @return o valor do fluxo máximo no grafo
      */
-    public double fluxoMaximo (Grafo g);
+    public double fluxoMaximo (Grafo g, Vertice origem, Vertice destino){
+        
+    }
     
 }

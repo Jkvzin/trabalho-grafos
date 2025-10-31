@@ -99,7 +99,7 @@ public class GrafoMatrizIncidencia implements Grafo{
         ArrayList<Double> linhaVertice = matriz.get(vertice.id());
 
         for(Double i : linhaVertice){
-            if (i != 0) {
+            if (i != 0) { // <-- Isso já conta entrada (+1) e saída (-1 e 2)
                 grau++;
             }
         }

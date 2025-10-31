@@ -123,6 +123,6 @@ public interface AlgoritmosEmGrafos {
      * @param g Grafo
      * @return o valor do fluxo máximo no grafo
      */
-    public double fluxoMaximo (Grafo g);
+    public double fluxoMaximo (Grafo g, Vertice origem, Vertice destino);
     
 }
