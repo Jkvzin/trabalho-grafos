@@ -2,13 +2,13 @@ package grafos;
 
 import java.util.ArrayList;
 
-public class GrafoListaAdjacencia implements Grafo{
+public class GrafoListaAdjacencia implements Grafo {
     private ArrayList<Vertice> vertices;
     private ArrayList<ArrayList<Aresta>> listaAdjacencia;
     private int numArestas;
     private int numVertices;
 
-    public GrafoListaAdjacencia (ArrayList<Vertice> vertices){
+    public GrafoListaAdjacencia(ArrayList<Vertice> vertices) {
         this.vertices = vertices;
         this.numVertices = vertices.size();
         this.numArestas = 0;
@@ -20,7 +20,6 @@ public class GrafoListaAdjacencia implements Grafo{
         }
     }
     
-    
     @Override
     public void adicionarAresta(Vertice origem, Vertice destino) throws Exception {
         adicionarAresta(origem, destino, 1.0);
@@ -29,27 +28,27 @@ public class GrafoListaAdjacencia implements Grafo{
     @Override
     public void adicionarAresta(Vertice origem, Vertice destino, double peso) throws Exception {
         Aresta novaAresta = new Aresta(origem, destino, peso);
-        
-        // Pega a lista de arestas do vértice de origem e adiciona a nova aresta
         this.listaAdjacencia.get(origem.id()).add(novaAresta);
         this.numArestas++;
     }
     
     @Override
-    public boolean existeAresta(Vertice origem, Vertice destino){
-    
+    public boolean existeAresta(Vertice origem, Vertice destino) throws Exception { // Adicionado throws
         ArrayList<Aresta> arestasOrigem = listaAdjacencia.get(origem.id());
 
-        for(Aresta aresta : arestasOrigem){
-            if (aresta.destino() == destino) {
+        for (Aresta aresta : arestasOrigem) {
+            // CORREÇÃO: Comparar por ID é mais seguro
+            if (aresta.destino().id() == destino.id()) {
                 return true;
             }
         }
         return false;
     }
     
-
-    //VERIFICAR TAMBÉM AS ARESTAS QUE ENTRAM NELE
+    /**
+     * Calcula o Grau de Entrada + Grau de Saída.
+     * (Como você pediu. AVISO: É lento O(V+E))
+     */
     @Override
     public int grauDoVertice(Vertice vertice) throws Exception {
         // 1. Grau de Saída (rápido)
@@ -59,7 +58,8 @@ public class GrafoListaAdjacencia implements Grafo{
         int grauEntrada = 0;
         for (ArrayList<Aresta> listaDeOutroVertice : this.listaAdjacencia) {
             for (Aresta aresta : listaDeOutroVertice) {
-                if (aresta.destino() == vertice) {
+                // CORREÇÃO: Comparar por ID é mais seguro
+                if (aresta.destino().id() == vertice.id()) {
                     grauEntrada++;
                 }
             }
@@ -69,44 +69,32 @@ public class GrafoListaAdjacencia implements Grafo{
     }
     
     @Override
-    public int numeroDeVertices(){
+    public int numeroDeVertices() {
         return numVertices;
     }
     
     @Override
-    public int numeroDeArestas(){
+    public int numeroDeArestas() {
         return numArestas;
     }
     
     @Override
-    /**
-     * Se existirem arestas paralelas ele vai adicionar duas vezes / não atrapalha mas é redundante
-     */
-    public ArrayList<Vertice> adjacentesDe(Vertice vertice) throws Exception{
-        try {
-            if (vertice == null) {
-                throw new Exception("Vertice não encontrado, verifique se escolheu um vértice que realmente existe no grafo.");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    public ArrayList<Vertice> adjacentesDe(Vertice vertice) throws Exception {
+        // (Removido o try-catch que retornava null)
         ArrayList<Vertice> adjacentes = new ArrayList<>();
         ArrayList<Aresta> arestasVertice = listaAdjacencia.get(vertice.id());
-        for(Aresta aresta : arestasVertice){
+        for (Aresta aresta : arestasVertice) {
             adjacentes.add(aresta.destino());
         }
         return adjacentes;
     }
     
     @Override
-    /**
-     * seta o peso da primeira aresta que encontrar
-     */
-    public void setarPeso(Vertice origem, Vertice destino, double peso) throws Exception{
+    public void setarPeso(Vertice origem, Vertice destino, double peso) throws Exception {
         ArrayList<Aresta> arestasVertice = listaAdjacencia.get(origem.id());
-        for(Aresta aresta : arestasVertice){
-            if(aresta.destino() == destino){
+        for (Aresta aresta : arestasVertice) {
+            // CORREÇÃO: Comparar por ID é mais seguro
+            if (aresta.destino().id() == destino.id()) {
                 aresta.setarPeso(peso);
                 return;
             }
@@ -114,11 +102,12 @@ public class GrafoListaAdjacencia implements Grafo{
     }
     
     @Override
-    public ArrayList<Aresta> arestasEntre(Vertice origem, Vertice destino) throws Exception{
+    public ArrayList<Aresta> arestasEntre(Vertice origem, Vertice destino) throws Exception {
         ArrayList<Aresta> arestasEntre = new ArrayList<>();
         ArrayList<Aresta> arestasVertice = listaAdjacencia.get(origem.id());
-        for(Aresta aresta : arestasVertice){
-            if(aresta.destino() == destino){
+        for (Aresta aresta : arestasVertice) {
+            // CORREÇÃO: Comparar por ID é mais seguro
+            if (aresta.destino().id() == destino.id()) {
                 arestasEntre.add(aresta);
             }
         }
@@ -126,8 +115,22 @@ public class GrafoListaAdjacencia implements Grafo{
     }
     
     @Override
-    public ArrayList<Vertice> vertices(){
+    public ArrayList<Vertice> vertices() {
         return vertices;
     }
-    
+
+    /**
+     * Cria o grafo transposto O(V+E)
+     */
+    @Override
+    public Grafo criarGrafoTransposto() throws Exception {
+        Grafo gT = new GrafoListaAdjacencia(this.vertices);
+        
+        for (ArrayList<Aresta> listaDoVerticeU : this.listaAdjacencia) {
+            for (Aresta a : listaDoVerticeU) {
+                gT.adicionarAresta(a.destino(), a.origem(), a.peso());
+            }
+        }
+        return gT;
+    }
 }

@@ -41,7 +41,7 @@ public interface Grafo {
      * @return True, se existe aresta entre origem e destino, False, caso contrário.
      * @throws java.lang.Exception Quando não existe origem e/ou destino.
      */
-    public boolean existeAresta(Vertice origem, Vertice destino);
+    public boolean existeAresta(Vertice origem, Vertice destino) throws Exception;
     
     /**
      * Indica o grau de um vértice específico.
@@ -97,4 +97,6 @@ public interface Grafo {
      */
     public ArrayList<Vertice> vertices();
     
+
+    public Grafo criarGrafoTransposto() throws Exception;
 }
