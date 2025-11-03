@@ -2,25 +2,15 @@ package grafos;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Scanner; // Importa o Scanner para ler a entrada do console
+import java.util.Scanner;
 
-/**
- * Classe principal para executar o Trabalho Prático 2.
- * Este é o "programa" executável que interage com o usuário
- * e chama os algoritmos.
- */
 public class Main {
 
-    // Cria uma instância estática (global) da sua classe de algoritmos.
-    // 'static' significa que este objeto pertence à classe Main, e não a uma instância dela.
+    // Cria uma instância estática (global) da sua classe de algoritmos
+    // 'static' significa que este objeto pertence à classe Main, e não a uma instância dela
     private static MeusAlgoritmosEmGrafos algoritmos = new MeusAlgoritmosEmGrafos();
     
-    // Cria um Scanner estático para ler a entrada do usuário (System.in = console)
     private static Scanner scanner = new Scanner(System.in);
-
-    /**
-     * Ponto de entrada do programa (o "play" do Java).
-     */
     public static void main(String[] args) {
         System.out.println("Trabalho Prático 2 - Projeto e Análise de Algoritmos");
         Grafo g = null; // O objeto do grafo começa como nulo
@@ -28,8 +18,6 @@ public class Main {
         // Loop principal do programa
         while (true) {
             
-            // --- PASSO 1: CARREGAR O GRAFO ---
-            // Se o grafo 'g' for nulo (na primeira vez ou se o usuário pediu para recarregar)...
             if (g == null) {
                 g = carregarGrafoPeloUsuario(); // ...chama o método para carregar
                 if (g == null) {
@@ -38,9 +26,6 @@ public class Main {
                 }
             }
 
-            // --- PASSO 2: MENU DE ALGORITMOS ---
-            // Chama o método que mostra o menu.
-            // 'querSair' vai receber 'true' se o usuário digitar 0, ou 'false' se digitar 9.
             boolean querSair = mostrarMenuAlgoritmos(g);
             
             if (querSair) {
@@ -224,7 +209,7 @@ public class Main {
     }
 
     /**
-     * (Helper) Formata uma coleção de arestas para uma impressão bonita.
+     * (Helper) Formata uma coleção de arestas para uma impressão bonita
      */
     private static String formatarArestas(Collection<Aresta> arestas) {
         if (arestas == null || arestas.isEmpty()) {
@@ -240,7 +225,7 @@ public class Main {
     }
 
     /**
-     * (Helper) Imprime o relatório completo do DFS (listas e tempos).
+     * (Helper) Imprime o relatório completo do DFS (listas e tempos)
      */
     private static void imprimirResultadosDFS(Grafo g) {
         System.out.println("Arestas de Árvore: " + formatarArestas(algoritmos.arestasDeArvore(g)));
@@ -258,7 +243,7 @@ public class Main {
     }
     
     /**
-     * (Helper) Imprime o relatório completo do BFS (lista, distâncias e pais).
+     * (Helper) Imprime o relatório completo do BFS (lista, distâncias e pais)
      */
     private static void imprimirResultadosBFS(Grafo g, Collection<Aresta> arestas) {
         System.out.println("Arestas da Árvore BFS: " + formatarArestas(arestas));
@@ -275,7 +260,7 @@ public class Main {
     }
 
     /**
-     * (Helper) Imprime o relatório completo do SCC (classificação, listas e grafo reduzido).
+     * (Helper) Imprime o relatório completo do SCC (classificação, listas e grafo reduzido)
      */
     private static void imprimirResultadosSCC(Grafo gOriginal, Grafo gReduzido, int[] sccMap) {
         int numSCC = gReduzido.numeroDeVertices();
@@ -291,19 +276,19 @@ public class Main {
         // Mapeamento de Vértices para Componentes
         System.out.println("\n--- Componentes ---");
         
-        // 1. Cria 'numSCC' listas vazias
+        // Cria 'numSCC' listas vazias
         ArrayList<ArrayList<Vertice>> componentes = new ArrayList<>();
         for (int i = 0; i < numSCC; i++) {
             componentes.add(new ArrayList<Vertice>());
         }
 
-        // 2. Preenche as listas usando o sccMap
+        // Preenche as listas usando o sccMap
         for (Vertice v : gOriginal.vertices()) {
             int componenteId = sccMap[v.id()];
             componentes.get(componenteId).add(v);
         }
         
-        // 3. Imprime as listas
+        // Imprime as listas
         for (int i = 0; i < numSCC; i++) {
             System.out.print("Componente " + i + ": { ");
             String prefixo = "";
